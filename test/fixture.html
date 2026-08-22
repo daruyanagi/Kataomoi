@@ -132,6 +132,51 @@
   </div>
 </div>
 
+
+<h3>タイムラインのツイート（フォロー関係は interceptor.js から postMessage で届く）</h3>
+<div id="timeline">
+
+  <!-- T1: following=true / followedBy=false => 💔 -->
+  <article data-testid="tweet" id="tweetA">
+    <div data-testid="User-Name" class="row">
+      <div class="row"><div class="col">
+        <a href="/kataomoi_san" class="col"><div class="row"><div class="row"><span class="name">片思いさん</span></div><div class="row"><span></span></div></div></a>
+      </div></div>
+      <div class="row"><div class="row"><div class="col">
+        <a href="/kataomoi_san" class="col"><div><span class="handle">@kataomoi_san</span></div></a>
+      </div><div><span class="handle">·</span></div></div></div>
+    </div>
+    <div class="bio">片思いさんのツイート</div>
+  </article>
+
+  <!-- T2: 相互フォロー => なし -->
+  <article data-testid="tweet" id="tweetB">
+    <div data-testid="User-Name" class="row">
+      <div class="row"><div class="col">
+        <a href="/ryoomoi_san" class="col"><div class="row"><div class="row"><span class="name">両思いさん</span></div><div class="row"><span></span></div></div></a>
+      </div></div>
+      <div class="row"><div class="row"><div class="col">
+        <a href="/ryoomoi_san" class="col"><div><span class="handle">@ryoomoi_san</span></div></a>
+      </div><div><span class="handle">·</span></div></div></div>
+    </div>
+    <div class="bio">両思いさんのツイート</div>
+  </article>
+
+  <!-- T3: 関係が届いていない投稿者 => なし（判定できないので付けない） -->
+  <article data-testid="tweet" id="tweetC">
+    <div data-testid="User-Name" class="row">
+      <div class="row"><div class="col">
+        <a href="/unknown_san" class="col"><div class="row"><div class="row"><span class="name">未知さん</span></div><div class="row"><span></span></div></div></a>
+      </div></div>
+      <div class="row"><div class="row"><div class="col">
+        <a href="/unknown_san" class="col"><div><span class="handle">@unknown_san</span></div></a>
+      </div><div><span class="handle">·</span></div></div></div>
+    </div>
+    <div class="bio">未知さんのツイート</div>
+  </article>
+
+</div>
+
 <div id="result">running…</div>
 
 <script>
@@ -146,7 +191,16 @@ window.chrome = {
 </script>
 <script src="../src/content.js"></script>
 <script>
-const EXPECTED = { cellA: 1, cellB: 0, cellC: 0, cellD: 1, cellE: 0, profileHeader: 1 };
+const EXPECTED = { cellA: 1, cellB: 0, cellC: 0, cellD: 1, cellE: 0, profileHeader: 1, tweetA: 1, tweetB: 0, tweetC: 0 };
+
+// interceptor.js が送ってくるのと同じ形のメッセージを流し込む
+window.postMessage({
+  __kataomoi: 1,
+  users: {
+    kataomoi_san: { following: true, followedBy: false },
+    ryoomoi_san: { following: true, followedBy: true }
+  }
+}, location.origin);
 
 setTimeout(() => {
   const lines = [];
@@ -169,7 +223,7 @@ setTimeout(() => {
 
   lines.push(ok ? '=> ALL PASS' : '=> SOME FAILED');
   document.getElementById('result').textContent = lines.join('\n');
-}, 600);
+}, 800);
 </script>
 </body>
 </html>

@@ -3,9 +3,14 @@
  *
  * 「自分はフォローしている」かつ「相手からはフォローされていない」ユーザーに 💔 を付ける。
  *
- * 判定はすべて画面の DOM だけで完結させている（API キーも追加の権限も不要）:
+ * ユーザー一覧とプロフィールは画面の DOM だけで判定できる:
  *   - 自分がフォローしている  … フォローボタンの data-testid が "<userId>-unfollow"
  *   - 相手がフォローしている  … 「フォローされています / Follows you」バッジの有無
+ *
+ * タイムラインのツイートにはどちらの手がかりも無いので、interceptor.js が
+ * X 自身の GraphQL レスポンスから拾ったフォロー関係を postMessage で受け取る。
+ *
+ * どちらの経路も追加のリクエストは投げず、API キーも要らない。
  */
 (() => {
   'use strict';
@@ -62,6 +67,9 @@
   const PROFILE_PATH = /^\/[A-Za-z0-9_]{1,15}\/?$/;
 
   let enabled = true;
+
+  /** interceptor.js から届いた screen_name（小文字）→ { following, followedBy } */
+  const relations = new Map();
 
   /* ------------------------------------------------------------------ 判定 */
 
@@ -161,6 +169,32 @@
     return inlineAnchor(document.querySelector('[data-testid="UserName"]'));
   }
 
+  /* -------------------------------------------------- タイムラインのツイート */
+
+  /** ツイートの投稿者の screen_name（小文字） */
+  function tweetHandle(nameRoot) {
+    const link = [...nameRoot.querySelectorAll('a')].find((a) =>
+      PROFILE_PATH.test(a.getAttribute('href') || '')
+    );
+    if (!link) return null;
+    return link.getAttribute('href').replace(/^\/|\/$/g, '').toLowerCase();
+  }
+
+  function updateTweet(tweet) {
+    // 引用ツイートにも User-Name はあるが、最初に見つかるのは常に本体の投稿者
+    const nameRoot = tweet.querySelector('[data-testid="User-Name"]');
+    if (!nameRoot) return;
+
+    const handle = tweetHandle(nameRoot);
+    const relation = handle && relations.get(handle);
+    const anchor = inlineAnchor(nameRoot);
+    if (!anchor) return;
+
+    // 関係が分からない投稿者には何も付けない（判定できないので）
+    if (relation && relation.following && !relation.followedBy) addHeart(anchor);
+    else removeHeart(nameRoot);
+  }
+
   /* ------------------------------------------------------------ スキャン */
 
   function scan() {
@@ -168,6 +202,10 @@
 
     for (const cell of document.querySelectorAll('[data-testid="UserCell"]')) {
       update(cell, cellAnchor(cell));
+    }
+
+    for (const tweet of document.querySelectorAll('article[data-testid="tweet"]')) {
+      updateTweet(tweet);
     }
 
     const profile = profileScope();
@@ -197,6 +235,20 @@
     // フォローボタンを押した直後は data-testid だけが差し替わることがある
     attributes: true,
     attributeFilter: ['data-testid']
+  });
+
+  window.addEventListener('message', (event) => {
+    if (event.source !== window) return;
+    const data = event.data;
+    if (!data || data.__kataomoi !== 1 || !data.users || typeof data.users !== 'object') return;
+
+    let added = false;
+    for (const [handle, relation] of Object.entries(data.users)) {
+      if (!relation || typeof relation !== 'object') continue;
+      relations.set(handle, { following: !!relation.following, followedBy: !!relation.followedBy });
+      added = true;
+    }
+    if (added) scheduleScan();
   });
 
   chrome.storage.sync.get({ enabled: true }, (settings) => {
