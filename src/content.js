@@ -58,6 +58,9 @@
     '追蹤中你'
   ]);
 
+  /** "/screen_name" 形式のプロフィールリンクだけを拾うためのパターン */
+  const PROFILE_PATH = /^\/[A-Za-z0-9_]{1,15}\/?$/;
+
   let enabled = true;
 
   /* ------------------------------------------------------------------ 判定 */
@@ -74,8 +77,9 @@
     for (const span of scope.querySelectorAll('span')) {
       if (span.childElementCount) continue;
       const text = span.textContent.trim();
+      // 自己紹介文を拾わないための保険。一覧の自己紹介には testid が付かないので
+      // 長さでも弾いておく（バッジの文言はどの言語でも 24 文字に収まる）
       if (!text || text.length > 24) continue;
-      // 自己紹介文に同じ文字列が含まれていても誤判定しないように除外する
       if (FOLLOWS_YOU_LABELS.has(text) && !span.closest('[data-testid="UserDescription"]')) {
         return true;
       }
@@ -112,12 +116,33 @@
 
   /* -------------------------------------------------------- 対象要素の取得 */
 
-  /** ユーザー一覧（フォロー中・フォロワー・検索結果など）の 1 行 */
+  /**
+   * 表示名と同じ行に並ぶ要素を返す。
+   *
+   * 表示名を包む要素は flex-direction: column なことが多く、そこへ足すと 💔 が
+   * 次の行に落ちてしまう。表示名の span の親（横並びの行）まで降りてから付ける。
+   */
+  function inlineAnchor(nameRoot) {
+    if (!nameRoot) return null;
+    const displayName = nameRoot.querySelector('span');
+    return (displayName && displayName.parentElement) || nameRoot;
+  }
+
+  /**
+   * ユーザー一覧（フォロー中・フォロワー・検索結果など）の 1 行。
+   *
+   * UserCell の中に表示名を指す data-testid は無いので、プロフィールへのリンクから辿る。
+   * 1 行の中には「アバター」「表示名」「@ID」の順で同じ href のリンクが並ぶため、
+   * アバターを除いた最初のリンクが表示名のリンクになる。
+   */
   function cellAnchor(cell) {
-    const name = cell.querySelector('[data-testid="User-Name"]');
-    if (!name) return null;
-    // 表示名の行に付けたいので、1 行目の要素を優先する
-    return name.firstElementChild || name;
+    const avatar = cell.querySelector('[data-testid^="UserAvatar-Container-"]');
+    const nameLink = [...cell.querySelectorAll('a')].find((a) => {
+      const href = a.getAttribute('href') || '';
+      if (!PROFILE_PATH.test(href)) return false;
+      return !(avatar && avatar.contains(a));
+    });
+    return inlineAnchor(nameLink);
   }
 
   /** プロフィールページのヘッダー（表示名とフォローボタンを両方含む祖先要素） */
@@ -132,9 +157,8 @@
   }
 
   function profileAnchor() {
-    const name = document.querySelector('[data-testid="UserName"]');
-    if (!name) return null;
-    return name.firstElementChild || name;
+    // UserName は表示名の行と @ID の行を両方含むので、表示名の行まで降りる
+    return inlineAnchor(document.querySelector('[data-testid="UserName"]'));
   }
 
   /* ------------------------------------------------------------ スキャン */
