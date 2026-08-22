@@ -1,0 +1,39 @@
+/* ストア用スクリーンショットのためのデモ画面。x.com のライトテーマを模したもの */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  height: 800px;
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  color: #0f1419;
+  font: 15px/1.4 "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  overflow: hidden;
+}
+.app { width: 620px; border-left: 1px solid #eff3f4; border-right: 1px solid #eff3f4; }
+.head {
+  display: flex; align-items: center; gap: 20px;
+  padding: 10px 16px; border-bottom: 1px solid #eff3f4;
+  position: sticky; top: 0; background: rgba(255,255,255,.9);
+}
+.back { font-size: 20px; color: #536471; }
+.head h1 { margin: 0; font-size: 17px; font-weight: 800; }
+.head .sub { font-size: 13px; color: #536471; font-weight: 400; }
+.tabs { display: flex; border-bottom: 1px solid #eff3f4; }
+.tabs div { flex: 1; text-align: center; padding: 15px 0; color: #536471; font-weight: 600; }
+.tabs div.on { color: #0f1419; font-weight: 800; box-shadow: inset 0 -4px 0 #1d9bf0; }
+.col { display: flex; flex-direction: column; }
+.row { display: flex; flex-direction: row; align-items: center; }
+a { text-decoration: none; color: inherit; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px; }
+.name { font-weight: 700; }
+.handle { color: #536471; }
+[data-testid="userFollowIndicator"] {
+  margin-left: 6px; padding: 0 4px; border-radius: 4px;
+  background: #eff3f4; color: #536471; font-size: 12px;
+}
+.bio { color: #0f1419; margin-top: 2px; font-size: 14px; }
+.follow-btn {
+  margin-left: auto; flex: none; border-radius: 9999px; border: 1px solid #cfd9de;
+  background: #fff; padding: 6px 16px; font-weight: 700; font-size: 14px; font-family: inherit;
+}

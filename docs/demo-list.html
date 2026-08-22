@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Kataomoi デモ - ユーザー一覧</title>
+<link rel="stylesheet" href="../src/content.css">
+<link rel="stylesheet" href="demo-common.css">
+</head>
+<body>
+<div class="app">
+  <div class="head">
+    <span class="back">←</span>
+    <div><h1>デモ ユーザー</h1><div class="sub">@demo_user</div></div>
+  </div>
+  <div class="tabs"><div>フォロワー</div><div class="on">フォロー中</div></div>
+
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-hikari_demo"><a href="/hikari_demo"><div class="avatar" style="background:#7856ff">そ</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/hikari_demo" class="col"><div class="row"><div class="row"><span><span class="name">そらの ひかり</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/hikari_demo"><div><span class="handle">@hikari_demo</span></div></a></div><div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="101-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">写真とコーヒーの話をします。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-ren_demo"><a href="/ren_demo"><div class="avatar" style="background:#00ba7c">み</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/ren_demo" class="col"><div class="row"><div class="row"><span><span class="name">みなと れん</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/ren_demo"><div><span class="handle">@ren_demo</span></div></a></div><div><div data-testid="userFollowIndicator"><span>フォローされています</span></div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="102-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">バックエンドエンジニア。趣味は自作キーボード。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-tsubasa_demo"><a href="/tsubasa_demo"><div class="avatar" style="background:#f91880">あ</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/tsubasa_demo" class="col"><div class="row"><div class="row"><span><span class="name">あおい つばさ</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/tsubasa_demo"><div><span class="handle">@tsubasa_demo</span></div></a></div><div><div data-testid="userFollowIndicator"><span>フォローされています</span></div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="103-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">イラスト描いてます。お仕事の相談は DM まで。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-tenki_demo"><a href="/tenki_demo"><div class="avatar" style="background:#1d9bf0">デ</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/tenki_demo" class="col"><div class="row"><div class="row"><span><span class="name">デモ天気</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/tenki_demo"><div><span class="handle">@tenki_demo</span></div></a></div><div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="104-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">デモ用の天気アカウントです。1 時間ごとに更新。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-kaede_demo"><a href="/kaede_demo"><div class="avatar" style="background:#ff7a00">な</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/kaede_demo" class="col"><div class="row"><div class="row"><span><span class="name">なつき かえで</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/kaede_demo"><div><span class="handle">@kaede_demo</span></div></a></div><div><div data-testid="userFollowIndicator"><span>フォローされています</span></div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="105-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">読んだ本の記録。ときどき映画。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-akane_demo"><a href="/akane_demo"><div class="avatar" style="background:#536471">し</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/akane_demo" class="col"><div class="row"><div class="row"><span><span class="name">しおり あかね</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/akane_demo"><div><span class="handle">@akane_demo</span></div></a></div><div><div data-testid="userFollowIndicator"><span>フォローされています</span></div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="106-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">ゲームと猫。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-haruka_demo"><a href="/haruka_demo"><div class="avatar" style="background:#c9385f">ふ</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/haruka_demo" class="col"><div class="row"><div class="row"><span><span class="name">ふゆの はるか</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/haruka_demo"><div><span class="handle">@haruka_demo</span></div></a></div><div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="107-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">週末は山に登っています。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-sou_demo"><a href="/sou_demo"><div class="avatar" style="background:#0f8a6a">き</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/sou_demo" class="col"><div class="row"><div class="row"><span><span class="name">きたやま そう</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/sou_demo"><div><span class="handle">@sou_demo</span></div></a></div><div><div data-testid="userFollowIndicator"><span>フォローされています</span></div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="108-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">デザインの話と、たまに音楽の話。</div>
+    </div>
+  </div>
+  <div data-testid="UserCell" role="button" style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid #eff3f4">
+    <div data-testid="UserAvatar-Container-news_demo"><a href="/news_demo"><div class="avatar" style="background:#5c6bc0">デ</div></a></div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="col">
+          <div class="col">
+            <a href="/news_demo" class="col"><div class="row"><div class="row"><span><span class="name">デモ技術ニュース</span></span></div><div></div></div></a>
+          </div>
+          <div class="row"><div><a href="/news_demo"><div><span class="handle">@news_demo</span></div></a></div><div></div></div>
+        </div>
+        <button class="follow-btn" data-testid="109-unfollow"><span><span>フォロー中</span></span></button>
+      </div>
+      <div class="bio">デモ用の技術ニュースアカウントです。</div>
+    </div>
+  </div>
+</div>
+<script src="demo-boot.js"></script>
+<script src="../src/content.js"></script>
+</body>
+</html>
