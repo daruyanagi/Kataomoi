@@ -66,6 +66,9 @@
   /** "/screen_name" 形式のプロフィールリンクだけを拾うためのパターン */
   const PROFILE_PATH = /^\/[A-Za-z0-9_]{1,15}\/?$/;
 
+  /** 画面に出ている "@screen_name" の表記 */
+  const HANDLE_TEXT = /^@([A-Za-z0-9_]{1,15})$/;
+
   let enabled = true;
 
   /** interceptor.js から届いた screen_name（小文字）→ { following, followedBy } */
@@ -173,18 +176,24 @@
 
   /** ツイートの投稿者の screen_name（小文字） */
   function tweetHandle(nameRoot) {
+    // 本体の投稿者名はプロフィールへのリンクになっている
     const link = [...nameRoot.querySelectorAll('a')].find((a) =>
       PROFILE_PATH.test(a.getAttribute('href') || '')
     );
-    if (!link) return null;
-    return link.getAttribute('href').replace(/^\/|\/$/g, '').toLowerCase();
+    if (link) return link.getAttribute('href').replace(/^\/|\/$/g, '').toLowerCase();
+
+    // 引用元は引用ブロック全体が 1 つのリンクになっていて、投稿者名は <a> ではない。
+    // その場合は表示されている @ID から拾う
+    for (const span of nameRoot.querySelectorAll('span')) {
+      if (span.childElementCount) continue;
+      const match = HANDLE_TEXT.exec(span.textContent.trim());
+      if (match) return match[1].toLowerCase();
+    }
+    return null;
   }
 
-  function updateTweet(tweet) {
-    // 引用ツイートにも User-Name はあるが、最初に見つかるのは常に本体の投稿者
-    const nameRoot = tweet.querySelector('[data-testid="User-Name"]');
-    if (!nameRoot) return;
-
+  /** ツイート 1 件ぶんの投稿者名（本体・引用元それぞれに対して呼ぶ） */
+  function updateTweetAuthor(nameRoot) {
     const handle = tweetHandle(nameRoot);
     const relation = handle && relations.get(handle);
     const anchor = inlineAnchor(nameRoot);
@@ -205,7 +214,10 @@
     }
 
     for (const tweet of document.querySelectorAll('article[data-testid="tweet"]')) {
-      updateTweet(tweet);
+      // 1 つのツイートに本体と引用元の 2 つの投稿者名が入っていることがある
+      for (const nameRoot of tweet.querySelectorAll('[data-testid="User-Name"]')) {
+        updateTweetAuthor(nameRoot);
+      }
     }
 
     const profile = profileScope();

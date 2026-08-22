@@ -24,6 +24,7 @@
   a { text-decoration: none; color: inherit; }
   [data-testid="userFollowIndicator"] { display: inline-block; margin-left: 6px; padding: 0 4px; border-radius: 4px; background: #eff3f4; color: #536471; font-size: 12px; }
   .bio { color: #0f1419; }
+  .quote { border: 1px solid #cfd9de; border-radius: 12px; padding: 8px; margin-top: 6px; }
   .follow-btn { margin-left: auto; border-radius: 9999px; border: 1px solid #cfd9de; background: #fff; padding: 6px 16px; font-weight: 700; }
   h3 { margin: 24px 0 4px; font-size: 14px; color: #536471; }
   #result { margin-top: 24px; padding: 12px; background: #f7f9f9; white-space: pre; font-family: ui-monospace, monospace; font-size: 13px; }
@@ -175,6 +176,27 @@
     <div class="bio">未知さんのツイート</div>
   </article>
 
+  <!-- T4: 本体は相互 / 引用元が片思い => 引用元にだけ 💔
+       引用元は引用ブロック全体が 1 つのリンクなので、投稿者名は <a> になっていない -->
+  <article data-testid="tweet" id="tweetD">
+    <div data-testid="User-Name" class="row">
+      <div class="row"><div class="col">
+        <a href="/ryoomoi_san" class="col"><div class="row"><div class="row"><span class="name">両思いさん</span></div><div class="row"><span></span></div></div></a>
+      </div></div>
+      <div class="row"><div class="row"><div class="col">
+        <a href="/ryoomoi_san" class="col"><div><span class="handle">@ryoomoi_san</span></div></a>
+      </div><div><span class="handle">·</span></div></div></div>
+    </div>
+    <div class="bio">引用付きのツイート</div>
+    <div role="link" class="quote" id="quoteBlock">
+      <div data-testid="User-Name" class="row">
+        <div class="row"><div class="row"><span class="name">片思いさん</span></div><div class="row"><span></span></div></div>
+        <div class="row"><div><span class="handle">@kataomoi_san</span></div><div><span class="handle">·</span></div></div>
+      </div>
+      <div class="bio">引用された側のツイート</div>
+    </div>
+  </article>
+
 </div>
 
 <div id="result">running…</div>
@@ -191,7 +213,7 @@ window.chrome = {
 </script>
 <script src="../src/content.js"></script>
 <script>
-const EXPECTED = { cellA: 1, cellB: 0, cellC: 0, cellD: 1, cellE: 0, profileHeader: 1, tweetA: 1, tweetB: 0, tweetC: 0 };
+const EXPECTED = { cellA: 1, cellB: 0, cellC: 0, cellD: 1, cellE: 0, profileHeader: 1, tweetA: 1, tweetB: 0, tweetC: 0, tweetD: 1 };
 
 // interceptor.js が送ってくるのと同じ形のメッセージを流し込む
 window.postMessage({
@@ -220,6 +242,10 @@ setTimeout(() => {
     ok = ok && pass;
     lines.push((pass ? 'PASS' : 'FAIL') + ' 挿入先が横並び (' + heart.parentElement.textContent.trim().slice(0, 12) + ') flex-direction=' + dir);
   }
+
+  const inQuote = document.querySelectorAll('#quoteBlock .kataomoi-heart').length === 1;
+  ok = ok && inQuote;
+  lines.push((inQuote ? 'PASS' : 'FAIL') + ' 引用元の投稿者に 💔 が入っている');
 
   lines.push(ok ? '=> ALL PASS' : '=> SOME FAILED');
   document.getElementById('result').textContent = lines.join('\n');
