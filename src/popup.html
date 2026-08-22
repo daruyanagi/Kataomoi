@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>片思いチェッカー</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --fg: #0f1419;
+        --sub: #536471;
+        --bg: #ffffff;
+        --line: #eff3f4;
+        --accent: #f4212e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fg: #e7e9ea;
+          --sub: #71767b;
+          --bg: #15202b;
+          --line: #38444d;
+        }
+      }
+      body {
+        width: 260px;
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.5 "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .count {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .count strong {
+        font-size: 28px;
+        color: var(--accent);
+      }
+      .note {
+        margin: 12px 0 0;
+        color: var(--sub);
+        font-size: 12px;
+      }
+      label.toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>💔 片思いチェッカー</h1>
+
+    <div class="count">
+      <strong id="count">–</strong>
+      <span>件を表示中</span>
+    </div>
+
+    <label class="toggle">
+      <span>💔 を表示する</span>
+      <input type="checkbox" id="enabled" />
+    </label>
+
+    <p class="note" id="note">
+      x.com のフォロー中一覧を開くと、フォローバックされていないユーザーに 💔 が付きます。
+    </p>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Kataomoi - 片思いチェッカー for X",
+  "version": "1.0.0",
+  "description": "X (Twitter) で自分がフォローしているのにフォローバックされていない「片思い」ユーザーの横に 💔 を表示します。",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "js": ["src/content.js"],
+      "css": ["src/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "片思いチェッカー",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  }
+}

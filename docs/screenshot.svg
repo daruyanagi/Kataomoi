@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="240" viewBox="0 0 560 240" font-family="'Segoe UI','Hiragino Sans','Noto Sans JP',sans-serif">
+  <rect width="560" height="240" rx="14" fill="#ffffff"/>
+  <rect x="0.5" y="0.5" width="559" height="239" rx="13.5" fill="none" stroke="#eff3f4"/>
+
+  <!-- row 1: 片思い -->
+  <circle cx="44" cy="60" r="22" fill="#cfd9de"/>
+  <path d="M36 66a8 8 0 0 1 16 0z" fill="#ffffff"/>
+  <circle cx="44" cy="52" r="7" fill="#ffffff"/>
+  <text x="80" y="52" font-size="15" font-weight="700" fill="#0f1419">片思いさん</text>
+  <text x="163" y="52" font-size="15" fill="#f4212e">&#128148;</text>
+  <text x="80" y="72" font-size="14" fill="#536471">@kataomoi_san</text>
+  <rect x="404" y="42" width="120" height="34" rx="17" fill="#ffffff" stroke="#cfd9de"/>
+  <text x="464" y="64" font-size="14" font-weight="700" fill="#0f1419" text-anchor="middle">フォロー中</text>
+
+  <line x1="24" y1="112" x2="536" y2="112" stroke="#eff3f4"/>
+
+  <!-- row 2: 相思相愛 -->
+  <circle cx="44" cy="164" r="22" fill="#cfd9de"/>
+  <path d="M36 170a8 8 0 0 1 16 0z" fill="#ffffff"/>
+  <circle cx="44" cy="156" r="7" fill="#ffffff"/>
+  <text x="80" y="156" font-size="15" font-weight="700" fill="#0f1419">両思いさん</text>
+  <text x="80" y="176" font-size="14" fill="#536471">@ryoomoi_san</text>
+  <rect x="196" y="163" width="112" height="20" rx="4" fill="#eff3f4"/>
+  <text x="252" y="177" font-size="12" fill="#536471" text-anchor="middle">フォローされています</text>
+  <rect x="404" y="146" width="120" height="34" rx="17" fill="#ffffff" stroke="#cfd9de"/>
+  <text x="464" y="168" font-size="14" font-weight="700" fill="#0f1419" text-anchor="middle">フォロー中</text>
+</svg>

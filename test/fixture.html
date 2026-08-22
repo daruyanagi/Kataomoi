@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Kataomoi fixture</title>
+<link rel="stylesheet" href="../src/content.css">
+<style>
+  body { font-family: sans-serif; padding: 20px; max-width: 640px; }
+  [data-testid="UserCell"] { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid #eee; align-items:flex-start; }
+  .name { font-weight:700; }
+  .handle { color:#536471; }
+  .badge { background:#eff3f4; color:#536471; font-size:12px; padding:1px 4px; border-radius:4px; margin-left:6px;}
+  button { margin-left:auto; }
+  #result { margin-top:20px; padding:12px; background:#f6f8fa; white-space:pre; font-family:monospace; }
+</style>
+</head>
+<body>
+<h3>ユーザー一覧（テスト用の擬似 DOM）</h3>
+
+<!-- A: フォローしている & フォローされていない => 片思い(💔あり) -->
+<div data-testid="UserCell" id="cellA">
+  <div>
+    <div data-testid="User-Name">
+      <div><a href="/kataomoi_san"><span class="name">片思いさん</span></a></div>
+      <div><a href="/kataomoi_san"><span class="handle">@kataomoi_san</span></a></div>
+    </div>
+    <div data-testid="UserDescription"><span>よろしくお願いします</span></div>
+  </div>
+  <button data-testid="111-unfollow"><span>フォロー中</span></button>
+</div>
+
+<!-- B: フォローしている & フォローされている => 両思い(なし) -->
+<div data-testid="UserCell" id="cellB">
+  <div>
+    <div data-testid="User-Name">
+      <div><a href="/ryoomoi_san"><span class="name">両思いさん</span></a></div>
+      <div><a href="/ryoomoi_san"><span class="handle">@ryoomoi_san</span></a><span class="badge">フォローされています</span></div>
+    </div>
+  </div>
+  <button data-testid="222-unfollow"><span>フォロー中</span></button>
+</div>
+
+<!-- C: フォローしていない => なし -->
+<div data-testid="UserCell" id="cellC">
+  <div>
+    <div data-testid="User-Name">
+      <div><a href="/mishiranu"><span class="name">見知らぬ人</span></a></div>
+      <div><a href="/mishiranu"><span class="handle">@mishiranu</span></a></div>
+    </div>
+  </div>
+  <button data-testid="333-follow"><span>フォロー</span></button>
+</div>
+
+<!-- D: フォローしている & 自己紹介に "Follows you" を含む => 片思い(💔あり: 誤判定しない) -->
+<div data-testid="UserCell" id="cellD">
+  <div>
+    <div data-testid="User-Name">
+      <div><a href="/tricky"><span class="name">紛らわしい人</span></a></div>
+      <div><a href="/tricky"><span class="handle">@tricky</span></a></div>
+    </div>
+    <div data-testid="UserDescription"><span>Follows you</span></div>
+  </div>
+  <button data-testid="444-unfollow"><span>フォロー中</span></button>
+</div>
+
+<!-- E: 英語 UI で相手にフォローされている => なし -->
+<div data-testid="UserCell" id="cellE">
+  <div>
+    <div data-testid="User-Name">
+      <div><a href="/english"><span class="name">English User</span></a></div>
+      <div><a href="/english"><span class="handle">@english</span></a><span class="badge">Follows you</span></div>
+    </div>
+  </div>
+  <button data-testid="555-unfollow"><span>Following</span></button>
+</div>
+
+<h3>プロフィールヘッダー（片思い想定）</h3>
+<div id="profileHeader">
+  <div data-testid="UserName">
+    <div><span class="name">プロフィールさん</span></div>
+    <div><span class="handle">@profile_san</span></div>
+  </div>
+  <div data-testid="placementTracking">
+    <button data-testid="999-unfollow"><span>フォロー中</span></button>
+  </div>
+</div>
+
+<div id="result">running…</div>
+
+<script>
+// chrome.* の最小スタブ
+window.chrome = {
+  storage: {
+    sync: { get: (defaults, cb) => cb(defaults) },
+    onChanged: { addListener: () => {} }
+  },
+  runtime: { onMessage: { addListener: () => {} } }
+};
+</script>
+<script src="../src/content.js"></script>
+<script>
+const expected = {
+  cellA: 1, cellB: 0, cellC: 0, cellD: 1, cellE: 0, profileHeader: 1
+};
+setTimeout(() => {
+  const lines = [];
+  let ok = true;
+  for (const [id, want] of Object.entries(expected)) {
+    const got = document.querySelectorAll('#' + id + ' .kataomoi-heart').length;
+    const pass = got === want;
+    ok = ok && pass;
+    lines.push((pass ? 'PASS' : 'FAIL') + ' ' + id + ' expected=' + want + ' got=' + got);
+  }
+  lines.push(ok ? 'ALL PASS' : 'SOME FAILED');
+  document.getElementById('result').textContent = lines.join('\n');
+}, 600);
+</script>
+</body>
+</html>

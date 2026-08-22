@@ -1,0 +1,10 @@
+.kataomoi-heart {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.95em;
+  line-height: 1;
+  vertical-align: baseline;
+  cursor: help;
+  user-select: none;
+  -webkit-user-select: none;
+}
