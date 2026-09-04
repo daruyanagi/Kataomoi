@@ -56,6 +56,19 @@
         margin-top: 12px;
         cursor: pointer;
       }
+      button.settings {
+        width: 100%;
+        margin-top: 14px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 9999px;
+        background: var(--bg);
+        color: var(--fg);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button.settings:hover { border-color: var(--accent); }
     </style>
   </head>
   <body>
@@ -75,6 +88,9 @@
       x.com のフォロー中一覧を開くと、フォローバックされていないユーザーに 💔 が付きます。
     </p>
 
+    <button type="button" class="settings" id="openOptions">設定を開く</button>
+
+    <script src="settings.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

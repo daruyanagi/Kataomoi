@@ -110,6 +110,7 @@ X (x.com / twitter.com) の画面上で、利用者自身がフォローして�
 | ストアアイコン | `icons/icon128.png` | 128×128 |
 | スクリーンショット 1 | `docs/store/screenshot-list.png` | 1280×800 |
 | スクリーンショット 2 | `docs/store/screenshot-timeline.png` | 1280×800 |
+| スクリーンショット 3 | `docs/store/options.png` | 設定ダイアログ（要リサイズ 1280×800） |
 | 小プロモタイル | `docs/store/promo-440x280.png` | 440×280 |
 
 スクリーンショットは架空のアカウントによるデモ画面（`docs/demo-list.html` / `docs/demo-timeline.html`）を実際の `src/content.js` で処理して撮ったものです。実在の利用者のタイムラインを写さないようにしています。

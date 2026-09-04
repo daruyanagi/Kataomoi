@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Kataomoi",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "X (Twitter) で自分がフォローしているのにフォローバックされていない「片思い」ユーザーに 💔 を表示します。タイムラインのツイートにも対応。",
   "icons": {
     "16": "icons/icon16.png",
@@ -30,6 +30,7 @@
         "https://twitter.com/*"
       ],
       "js": [
+        "src/settings.js",
         "src/content.js"
       ],
       "css": [
@@ -47,5 +48,9 @@
       "128": "icons/icon128.png"
     }
   },
-  "minimum_chrome_version": "111"
+  "minimum_chrome_version": "111",
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": false
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * Kataomoi - 片思いチェッカー for X
+ * Kataomoi
  *
  * 「自分はフォローしている」かつ「相手からはフォローされていない」ユーザーに 💔 を付ける。
  *
@@ -15,9 +15,15 @@
 (() => {
   'use strict';
 
-  const HEART_CLASS = 'kataomoi-heart';
-  const HEART = '💔';
-  const TOOLTIP = '片思い: あなたはフォローしていますが、フォローバックされていません';
+  /** 印の共通クラス。種類ごとのクラスと大きさのクラスを足して使う */
+  const MARK_CLASS = 'kataomoi-mark';
+  const KATAOMOI_CLASS = 'kataomoi-heart';
+  const MUTUAL_CLASS = 'kataomoi-mutual';
+
+  const TOOLTIP = {
+    kataomoi: '片思い: あなたはフォローしていますが、フォローバックされていません',
+    mutual: '相互フォロー'
+  };
 
   /**
    * 「フォローされています」バッジの文言。X の UI 言語ごとに変わるため主要ロケールを列挙する。
@@ -69,7 +75,8 @@
   /** 画面に出ている "@screen_name" の表記 */
   const HANDLE_TEXT = /^@([A-Za-z0-9_]{1,15})$/;
 
-  let enabled = true;
+  /** 設定。chrome.storage から読み込むまでは既定値で動かす */
+  let settings = Object.assign({}, KATAOMOI_DEFAULTS);
 
   /** interceptor.js から届いた screen_name（小文字）→ { following, followedBy } */
   const relations = new Map();
@@ -100,29 +107,72 @@
 
   /* ------------------------------------------------------------------ 描画 */
 
-  function addHeart(anchor) {
-    if (!anchor || anchor.querySelector(':scope > .' + HEART_CLASS)) return;
-    const heart = document.createElement('span');
-    heart.className = HEART_CLASS;
-    heart.textContent = HEART;
-    heart.title = TOOLTIP;
-    heart.setAttribute('aria-label', '片思い');
-    heart.setAttribute('role', 'img');
-    anchor.appendChild(heart);
-  }
+  /**
+   * scope の中の印を kind の状態に合わせる。
+   *
+   * kind は 'kataomoi' / 'mutual' / null（印なし）。仮想スクロールで DOM が
+   * 使い回されたり設定が変わったりするので、毎回この関数で状態を合わせ直す。
+   */
+  function setMark(scope, anchor, kind) {
+    const existing = scope.querySelector('.' + MARK_CLASS);
 
-  function removeHeart(scope) {
-    scope.querySelectorAll('.' + HEART_CLASS).forEach((el) => el.remove());
-  }
-
-  function update(scope, anchor) {
-    if (!anchor) return;
-    if (youFollowThem(scope) && !theyFollowYou(scope)) {
-      addHeart(anchor);
-    } else {
-      // 仮想スクロールで DOM が使い回されることがあるので、条件を満たさなくなったら消す
-      removeHeart(scope);
+    if (!kind || !anchor) {
+      if (existing) existing.remove();
+      return;
     }
+
+    const mutual = kind === 'mutual';
+    const text = mutual ? settings.mutualIcon : settings.icon;
+    if (!text) {
+      if (existing) existing.remove();
+      return;
+    }
+
+    // 中身が同じなら作り直さない（毎回の走査で DOM を触らないため）
+    if (existing) {
+      if (existing.dataset.kataomoiKind === kind && existing.textContent === text) return;
+      existing.remove();
+    }
+
+    const mark = document.createElement('span');
+    mark.className = [
+      MARK_CLASS,
+      mutual ? MUTUAL_CLASS : KATAOMOI_CLASS,
+      MARK_CLASS + '--' + settings.iconSize
+    ].join(' ');
+    mark.dataset.kataomoiKind = kind;
+    mark.textContent = text;
+    mark.title = TOOLTIP[kind];
+    mark.setAttribute('aria-label', mutual ? '相互フォロー' : '片思い');
+    mark.setAttribute('role', 'img');
+    anchor.appendChild(mark);
+  }
+
+  /**
+   * フォローしている相手に付ける印の種類を返す。
+   * 相互フォローの印は既定でオフなので、設定を見て null を返す。
+   */
+  function kindFor(followedBy) {
+    if (!followedBy) return 'kataomoi';
+    return settings.markMutual ? 'mutual' : null;
+  }
+
+  /** DOM から関係が読み取れる場所（ユーザー一覧・プロフィール）用 */
+  function markFromDom(scope, anchor, visible) {
+    if (!visible || !youFollowThem(scope)) {
+      setMark(scope, anchor, null);
+      return;
+    }
+    setMark(scope, anchor, kindFor(theyFollowYou(scope)));
+  }
+
+  /** relations から関係を引く場所（タイムライン）用 */
+  function markFromRelation(scope, anchor, relation, visible) {
+    if (!visible || !relation || !relation.following) {
+      setMark(scope, anchor, null);
+      return;
+    }
+    setMark(scope, anchor, kindFor(relation.followedBy));
   }
 
   /* -------------------------------------------------------- 対象要素の取得 */
@@ -193,39 +243,40 @@
   }
 
   /** ツイート 1 件ぶんの投稿者名（本体・引用元それぞれに対して呼ぶ） */
-  function updateTweetAuthor(nameRoot) {
+  function updateTweetAuthor(nameRoot, visible) {
     const handle = tweetHandle(nameRoot);
-    const relation = handle && relations.get(handle);
-    const anchor = inlineAnchor(nameRoot);
-    if (!anchor) return;
-
     // 関係が分からない投稿者には何も付けない（判定できないので）
-    if (relation && relation.following && !relation.followedBy) addHeart(anchor);
-    else removeHeart(nameRoot);
+    markFromRelation(nameRoot, inlineAnchor(nameRoot), handle && relations.get(handle), visible);
   }
 
   /* ------------------------------------------------------------ スキャン */
 
   function scan() {
-    if (!enabled) return;
+    // 設定でオフにした場所は、付いていた印を消したいので走査自体は続ける
+    const on = settings.enabled;
 
     for (const cell of document.querySelectorAll('[data-testid="UserCell"]')) {
-      update(cell, cellAnchor(cell));
+      markFromDom(cell, cellAnchor(cell), on && settings.showInLists);
     }
 
     for (const tweet of document.querySelectorAll('article[data-testid="tweet"]')) {
       // 1 つのツイートに本体と引用元の 2 つの投稿者名が入っていることがある
-      for (const nameRoot of tweet.querySelectorAll('[data-testid="User-Name"]')) {
-        updateTweetAuthor(nameRoot);
-      }
+      const nameRoots = [...tweet.querySelectorAll('[data-testid="User-Name"]')];
+      nameRoots.forEach((nameRoot, index) => {
+        const quoted = index > 0;
+        updateTweetAuthor(
+          nameRoot,
+          on && settings.showInTimeline && (!quoted || settings.showQuoted)
+        );
+      });
     }
 
     const profile = profileScope();
-    if (profile) update(profile, profileAnchor());
+    if (profile) markFromDom(profile, profileAnchor(), on && settings.showInProfile);
   }
 
   function clearAll() {
-    document.querySelectorAll('.' + HEART_CLASS).forEach((el) => el.remove());
+    document.querySelectorAll('.' + MARK_CLASS).forEach((el) => el.remove());
   }
 
   let scheduled = false;
@@ -263,23 +314,33 @@
     if (added) scheduleScan();
   });
 
-  chrome.storage.sync.get({ enabled: true }, (settings) => {
-    enabled = settings.enabled;
+  chrome.storage.sync.get(KATAOMOI_DEFAULTS, (stored) => {
+    settings = Object.assign({}, KATAOMOI_DEFAULTS, stored);
     scan();
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'sync' || !changes.enabled) return;
-    enabled = changes.enabled.newValue;
-    if (enabled) scan();
-    else clearAll();
+    if (area !== 'sync') return;
+
+    let touched = false;
+    for (const key of Object.keys(changes)) {
+      if (!(key in KATAOMOI_DEFAULTS)) continue;
+      settings[key] = changes[key].newValue;
+      touched = true;
+    }
+    if (!touched) return;
+
+    // 記号や大きさが変わったときは付け直す必要があるので、いったん全部消す
+    clearAll();
+    scan();
   });
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (!message || message.type !== 'kataomoi:stats') return;
     sendResponse({
-      enabled,
-      count: document.querySelectorAll('.' + HEART_CLASS).length
+      enabled: settings.enabled,
+      count: document.querySelectorAll('.' + KATAOMOI_CLASS).length,
+      mutualCount: document.querySelectorAll('.' + MUTUAL_CLASS).length
     });
   });
 })();

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>Kataomoi の設定</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --fg: #0f1419;
+        --sub: #536471;
+        --bg: #ffffff;
+        --panel: #f7f9f9;
+        --line: #eff3f4;
+        --accent: #f4212e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fg: #e7e9ea;
+          --sub: #8b98a5;
+          --bg: #15202b;
+          --panel: #1c2732;
+          --line: #38444d;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 20px;
+        min-width: 460px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.6 "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 18px;
+      }
+      .lead {
+        margin: 0 0 20px;
+        color: var(--sub);
+        font-size: 13px;
+      }
+      fieldset {
+        margin: 0 0 16px;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+      }
+      legend {
+        padding: 0 6px;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 0;
+      }
+      .field label { flex: 1; }
+      .field.sub { padding-left: 24px; }
+      .field.sub label { color: var(--sub); }
+      input[type="text"] {
+        width: 72px;
+        padding: 5px 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--fg);
+        font: inherit;
+        text-align: center;
+      }
+      select {
+        padding: 5px 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--fg);
+        font: inherit;
+      }
+      .presets { display: flex; gap: 6px; }
+      .presets button {
+        width: 34px;
+        height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--bg);
+        font-size: 15px;
+        cursor: pointer;
+      }
+      .presets button:hover { border-color: var(--accent); }
+      .preview {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--bg);
+      }
+      .preview .avatar {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: #7856ff; color: #fff;
+        display: grid; place-items: center; font-weight: 700; font-size: 13px;
+      }
+      .preview .name { font-weight: 700; }
+      .preview .handle { color: var(--sub); font-size: 13px; }
+      footer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 4px;
+      }
+      button.secondary {
+        padding: 7px 14px;
+        border: 1px solid var(--line);
+        border-radius: 9999px;
+        background: var(--bg);
+        color: var(--fg);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      #status {
+        color: var(--sub);
+        font-size: 13px;
+        opacity: 0;
+        transition: opacity .2s;
+      }
+      #status.show { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <h1>💔 Kataomoi の設定</h1>
+    <p class="lead">変更するとすぐに保存され、開いている X のタブにも反映されます。</p>
+
+    <fieldset>
+      <legend>印</legend>
+
+      <div class="field">
+        <label for="icon">片思いのときの記号</label>
+        <div class="presets" id="iconPresets">
+          <button type="button" data-icon="💔">💔</button>
+          <button type="button" data-icon="🥀">🥀</button>
+          <button type="button" data-icon="😢">😢</button>
+          <button type="button" data-icon="👀">👀</button>
+        </div>
+        <input type="text" id="icon" maxlength="4" />
+      </div>
+
+      <div class="field">
+        <label for="iconSize">大きさ</label>
+        <select id="iconSize">
+          <option value="small">小</option>
+          <option value="medium">中</option>
+          <option value="large">大</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <input type="checkbox" id="markMutual" />
+        <label for="markMutual">相互フォローにも印を付ける</label>
+        <input type="text" id="mutualIcon" maxlength="4" />
+      </div>
+
+      <div class="preview">
+        <div class="avatar">プ</div>
+        <div>
+          <div><span class="name">プレビュー</span><span id="previewMark"></span></div>
+          <div class="handle">@preview</div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>表示する場所</legend>
+
+      <div class="field">
+        <input type="checkbox" id="showInLists" />
+        <label for="showInLists">ユーザー一覧（フォロー中・フォロワー・検索結果）</label>
+      </div>
+
+      <div class="field">
+        <input type="checkbox" id="showInTimeline" />
+        <label for="showInTimeline">タイムラインのツイート</label>
+      </div>
+
+      <div class="field sub">
+        <input type="checkbox" id="showQuoted" />
+        <label for="showQuoted">引用元の投稿者にも表示する</label>
+      </div>
+
+      <div class="field">
+        <input type="checkbox" id="showInProfile" />
+        <label for="showInProfile">プロフィールページ</label>
+      </div>
+    </fieldset>
+
+    <footer>
+      <button type="button" class="secondary" id="reset">既定に戻す</button>
+      <span id="status">保存しました</span>
+    </footer>
+
+    <script src="settings.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

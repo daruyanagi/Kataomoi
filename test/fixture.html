@@ -202,18 +202,64 @@
 <div id="result">running…</div>
 
 <script>
-// content.js は拡張機能として動く前提なので chrome.* を最小限スタブする
+// content.js は拡張機能として動く前提なので chrome.* をスタブする。
+// 設定変更の振る舞いも試したいので、storage.sync は実態を持つ小さなストアにする
+const __store = {};
+const __listeners = [];
 window.chrome = {
   storage: {
-    sync: { get: (defaults, cb) => cb(defaults) },
-    onChanged: { addListener: () => {} }
+    sync: {
+      get(defaults, cb) {
+        const out = {};
+        for (const key of Object.keys(defaults)) {
+          out[key] = key in __store ? __store[key] : defaults[key];
+        }
+        cb(out);
+      },
+      set(values, cb) {
+        const changes = {};
+        for (const [key, value] of Object.entries(values)) {
+          __store[key] = value;
+          changes[key] = { newValue: value };
+        }
+        __listeners.forEach((fn) => fn(changes, 'sync'));
+        if (cb) cb();
+      }
+    },
+    onChanged: { addListener: (fn) => __listeners.push(fn) }
   },
   runtime: { onMessage: { addListener: () => {} } }
 };
 </script>
+<script src="../src/settings.js"></script>
 <script src="../src/content.js"></script>
 <script>
-const EXPECTED = { cellA: 1, cellB: 0, cellC: 0, cellD: 1, cellE: 0, profileHeader: 1, tweetA: 1, tweetB: 0, tweetC: 0, tweetD: 1 };
+const lines = [];
+let ok = true;
+
+function check(label, actual, expected) {
+  const pass = actual === expected;
+  ok = ok && pass;
+  lines.push((pass ? 'PASS' : 'FAIL') + ' ' + label + ' → ' + actual + '（期待 ' + expected + '）');
+}
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const settle = () => wait(320);
+
+function marks(selector) {
+  return document.querySelectorAll(selector + ' .kataomoi-mark').length;
+}
+function markText(selector) {
+  const el = document.querySelector(selector + ' .kataomoi-mark');
+  return el ? el.textContent : '(なし)';
+}
+function markKind(selector) {
+  const el = document.querySelector(selector + ' .kataomoi-mark');
+  return el ? el.dataset.kataomoiKind : '(なし)';
+}
+function set(values) {
+  return new Promise((resolve) => chrome.storage.sync.set(values, resolve)).then(settle);
+}
 
 // interceptor.js が送ってくるのと同じ形のメッセージを流し込む
 window.postMessage({
@@ -224,32 +270,79 @@ window.postMessage({
   }
 }, location.origin);
 
-setTimeout(() => {
-  const lines = [];
-  let ok = true;
+(async () => {
+  await wait(600);
 
+  /* ---------------------------------------------------------- 既定設定 */
+  lines.push('【既定設定】');
+  const EXPECTED = {
+    cellA: 1, cellB: 0, cellC: 0, cellD: 1, cellE: 0,
+    profileHeader: 1, tweetA: 1, tweetB: 0, tweetC: 0, tweetD: 1
+  };
   for (const [id, want] of Object.entries(EXPECTED)) {
-    const got = document.querySelectorAll('#' + id + ' .kataomoi-heart').length;
-    const pass = got === want;
-    ok = ok && pass;
-    lines.push((pass ? 'PASS' : 'FAIL') + ' ' + id + ' 💔=' + got + ' (期待 ' + want + ')');
+    check(id + ' の印', marks('#' + id), want);
   }
 
-  // 💔 が表示名と同じ行に入っているか（縦積みの親に入れると改行してしまう）
-  for (const heart of document.querySelectorAll('.kataomoi-heart')) {
-    const dir = getComputedStyle(heart.parentElement).flexDirection;
-    const pass = dir === 'row';
-    ok = ok && pass;
-    lines.push((pass ? 'PASS' : 'FAIL') + ' 挿入先が横並び (' + heart.parentElement.textContent.trim().slice(0, 12) + ') flex-direction=' + dir);
+  for (const mark of document.querySelectorAll('.kataomoi-mark')) {
+    const dir = getComputedStyle(mark.parentElement).flexDirection;
+    check('挿入先が横並び (' + mark.parentElement.textContent.trim().slice(0, 10) + ')', dir, 'row');
   }
+  check('引用元の投稿者に印', marks('#quoteBlock'), 1);
 
-  const inQuote = document.querySelectorAll('#quoteBlock .kataomoi-heart').length === 1;
-  ok = ok && inQuote;
-  lines.push((inQuote ? 'PASS' : 'FAIL') + ' 引用元の投稿者に 💔 が入っている');
+  /* -------------------------------------------------- 相互フォローの印 */
+  lines.push('【markMutual: true】');
+  await set({ markMutual: true });
+  check('cellB（相互）の記号', markText('#cellB'), '💚');
+  check('cellB（相互）の種類', markKind('#cellB'), 'mutual');
+  check('tweetB（相互）の記号', markText('#tweetB'), '💚');
+  check('cellA（片思い）はそのまま', markText('#cellA'), '💔');
+  check('cellC（未フォロー）は印なし', marks('#cellC'), 0);
+  await set({ markMutual: false });
+
+  /* ------------------------------------------------------------ 記号と大きさ */
+  lines.push('【icon / iconSize】');
+  await set({ icon: '🥀', iconSize: 'large' });
+  check('cellA の記号', markText('#cellA'), '🥀');
+  check('tweetA の記号', markText('#tweetA'), '🥀');
+  check(
+    'cellA の大きさクラス',
+    document.querySelector('#cellA .kataomoi-mark').classList.contains('kataomoi-mark--large'),
+    true
+  );
+  await set({ icon: KATAOMOI_DEFAULTS.icon, iconSize: KATAOMOI_DEFAULTS.iconSize });
+
+  /* -------------------------------------------------------- 表示する場所 */
+  lines.push('【showInTimeline: false】');
+  await set({ showInTimeline: false });
+  check('tweetA の印', marks('#tweetA'), 0);
+  check('tweetD の印', marks('#tweetD'), 0);
+  check('cellA は残る', marks('#cellA'), 1);
+  await set({ showInTimeline: true });
+
+  lines.push('【showQuoted: false】');
+  await set({ showQuoted: false });
+  check('引用元の印', marks('#quoteBlock'), 0);
+  check('tweetD 全体の印', marks('#tweetD'), 0);
+  check('tweetA（本体）は残る', marks('#tweetA'), 1);
+  await set({ showQuoted: true });
+
+  lines.push('【showInLists / showInProfile: false】');
+  await set({ showInLists: false, showInProfile: false });
+  check('cellA の印', marks('#cellA'), 0);
+  check('profileHeader の印', marks('#profileHeader'), 0);
+  check('tweetA は残る', marks('#tweetA'), 1);
+  await set({ showInLists: true, showInProfile: true });
+
+  /* -------------------------------------------------------------- 全体オフ */
+  lines.push('【enabled: false】');
+  await set({ enabled: false });
+  check('画面全体の印', document.querySelectorAll('.kataomoi-mark').length, 0);
+  await set({ enabled: true });
+  check('戻したときの印の数', document.querySelectorAll('.kataomoi-mark').length, 5);
 
   lines.push(ok ? '=> ALL PASS' : '=> SOME FAILED');
   document.getElementById('result').textContent = lines.join('\n');
-}, 800);
+})();
 </script>
 </body>
 </html>

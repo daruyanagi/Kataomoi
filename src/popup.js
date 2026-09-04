@@ -4,7 +4,7 @@ const countEl = document.getElementById('count');
 const noteEl = document.getElementById('note');
 const enabledEl = document.getElementById('enabled');
 
-chrome.storage.sync.get({ enabled: true }, (settings) => {
+chrome.storage.sync.get({ enabled: KATAOMOI_DEFAULTS.enabled }, (settings) => {
   enabledEl.checked = settings.enabled;
 });
 
@@ -28,5 +28,9 @@ function refresh() {
     });
   });
 }
+
+document.getElementById('openOptions').addEventListener('click', () => {
+  chrome.runtime.openOptionsPage();
+});
 
 refresh();
